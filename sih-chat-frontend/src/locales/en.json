@@ -1,0 +1,21 @@
+{
+  "welcome": "SIH Chat",
+  "welcomeTitle": "Welcome to SIH Chat",
+  "typeMessage": "Type your message...",
+  "send": "Send",
+  "selectLanguage": "Select Language",
+  "loading": "Loading...",
+  "errorMessage": "Sorry, something went wrong. Please try again.",
+  "clearChat": "Clear Chat",
+  "chatWindow": "Chat messages",
+  "welcomeMessage": "Your intelligent conversation partner is ready. Start by sending a message below to begin our interaction.",
+  "messageInput": "Message input",
+  "sendMessage": "Send message",
+  "sendHelp": "Press Enter to send, Shift+Enter for new line",
+  "startListening": "Start voice input",
+  "stopListening": "Stop listening",
+  "aiThinking": "AI is thinking...",
+  "secure": "Secure",
+  "aiReady": "AI Ready",
+  "voiceAvailable": "Voice input available"
+}

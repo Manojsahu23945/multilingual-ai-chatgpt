@@ -1,0 +1,21 @@
+{
+  "welcome": "SIH चैट",
+  "welcomeTitle": "SIH चैट में आपका स्वागत है",
+  "typeMessage": "अपना संदेश टाइप करें...",
+  "send": "भेजें",
+  "selectLanguage": "भाषा चुनें",
+  "loading": "लोड हो रहा है...",
+  "errorMessage": "माफ़ करें, कुछ गलत हुआ है। कृपया पुनः प्रयास करें।",
+  "clearChat": "चैट साफ़ करें",
+  "chatWindow": "चैट संदेश",
+  "welcomeMessage": "आपका बुद्धिमान वार्तालाप साथी तैयार है। बातचीत शुरू करने के लिए नीचे एक संदेश भेजें।",
+  "messageInput": "संदेश इनपुट",
+  "sendMessage": "संदेश भेजें",
+  "sendHelp": "भेजने के लिए Enter दबाएं, नई लाइन के लिए Shift+Enter",
+  "startListening": "ध्वनि इनपुट शुरू करें",
+  "stopListening": "सुनना बंद करें",
+  "aiThinking": "AI सोच रहा है...",
+  "secure": "सुरक्षित",
+  "aiReady": "AI तैयार",
+  "voiceAvailable": "ध्वनि इनपुट उपलब्ध"
+}
