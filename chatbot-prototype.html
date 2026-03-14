@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusBot - Chatbot Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a4ba0);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            width: 100%;
+            max-width: 500px;
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 5px 10px;
+        }
+
+        .language-selector select {
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .language-selector select option {
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f0f4f8;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #1a3a8f;
+        }
+
+        .voice-btn, .send-btn {
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-btn:hover, .send-btn:hover {
+            background: linear-gradient(90deg, #1a3a8f, #0d1b3e);
+            transform: scale(1.05);
+        }
+
+        .voice-btn i, .send-btn i {
+            font-size: 18px;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background-color: white;
+            padding: 12px 18px;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: #1a3a8f;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: bounce 1.3s linear infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .chatbot-container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chat-header">
+            <h1>CampusBot</h1>
+            <p>Your multilingual college assistant</p>
+            <div class="language-selector">
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="mr">Marathi</option>
+                    <option value="bn">Bengali</option>
+                    <option value="te">Telugu</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                Hello! I'm CampusBot. How can I assist you today?
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="userInput" placeholder="Type your message here...">
+            <button class="voice-btn" id="voiceButton">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="send-btn" id="sendButton">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        // Chatbot implementation with instant response knowledge base
+        const knowledgeBase = {
+            'en': {
+                'course': 'B.Tech, M.Tech, PhD programs available. Visit website for details.',
+                'fee': 'Contact finance@college.edu for fee information.',
+                'admission': 'Admissions open in May. Check website for forms and deadlines.',
+                'hostel': 'Hostel facilities available for all students. Contact hostel@college.edu for details.',
+                'library': 'Library open 24/7 for students. Over 50,000 books and journals available.',
+                'exam': 'Exam schedule available on student portal. Contact exam@college.edu for queries.',
+                'placement': 'Placement cell active. Top companies visit campus regularly.',
+                'scholarship': 'Merit and need-based scholarships available. Apply through student portal.',
+                'contact': 'Contact us at info@college.edu or call +91-9876543210',
+                'hello': 'Hello! How can I assist you today?',
+                'hi': 'Hi there! How can I help you?',
+                'thanks': 'You\'re welcome! Is there anything else I can help with?',
+                'thank you': 'You\'re welcome! Is there anything else I can help with?'
+            },
+            'hi': {
+                'पाठ्यक्रम': 'बी.टेक, एम.टेक, पीएचडी कार्यक्रम उपलब्ध हैं। विवरण के लिए वेबसाइट पर जाएं।',
+                'शुल्क': 'शुल्क जानकारी के लिए finance@college.edu से संपर्क करें।',
+                'प्रवेश': 'मई में प्रवेश खुला है। फॉर्म और समय सीमा के लिए वेबसाइट देखें।',
+                'छात्रावास': 'सभी छात्रों के लिए छात्रावास सुविधाएं उपलब्ध हैं। विवरण के लिए hostel@college.edu से संपर्क करें।',
+                'पुस्तकालय': 'छात्रों के लिए 24/7 पुस्तकालय खुला है। 50,000 से अधिक पुस्तकें और पत्रिकाएं उपलब्ध हैं।',
+                'परीक्षा': 'छात्र पोर्टल पर परीक्षा कार्यक्रम उपलब्ध है। पूछताछ के लिए exam@college.edu से संपर्क करें।',
+                'नौकरी': 'नौकरी कक्ष सक्रिय है। शीर्ष कंपनियां नियमित रूप से परिसर का दौरा करती हैं।',
+                'छात्रवृत्ति': 'योग्यता और आवश्यकता के आधार पर छात्रवृत्ति उपलब्ध है। छात्र पोर्टल के माध्यम से आवेदन करें।',
+                'संपर्क': 'हमसे संपर्क करें info@college.edu या कॉल करें +91-9876543210',
+                'नमस्ते': 'नमस्ते! मैं आज आपकी कैसे सहायता कर सकता हूँ?',
+                'हैलो': 'हैलो! मैं आपकी कैसे मदद कर सकता हूँ?',
+                'धन्यवाद': 'आपका स्वागत है! क्या मैं कुछ और मदद कर सकता हूँ?',
+                'शुक्रिया': 'आपका स्वागत है! क्या मैं कुछ और मदद कर सकता हूँ?'
+            },
+            'mr': {
+                'अभ्यासक्रम': 'बी.टेक, एम.टेक, पीएचडी कार्यक्रम उपलब्ध. तपशीलांसाठी संकेतस्थळ पहा.',
+                'शुल्क': 'शुल्क माहितीसाठी finance@college.edu शी संपर्क साधा.',
+                'प्रवेश': 'मे मध्ये प्रवेश उघडे आहे. अर्ज आणि अंतिम तारीखींसाठी संकेतस्थळ पहा.',
+                'छात्रावास': 'सर्व विद्यार्थ्यांसाठी छात्रावास सुविधा उपलब्ध. तपशीलांसाठी hostel@college.edu शी संपर्क साधा.',
+                'ग्रंथालय': 'विद्यार्थ्यांसाठी 24/7 ग्रंथालय उघडे आहे. 50,000 हून अधिक पुस्तके आणि वृत्तपत्रे उपलब्ध.',
+                'परीक्षा': 'छात्र पोर्टल वर परीक्षा वेळापत्रक उपलब्ध. पृच्छांसाठी exam@college.edu शी संपर्क साधा.',
+                'नोकरी': 'नोकरी कक्ष सक्रिय. शीर्ष कंपन्या नियमितपणे कॅम्पस भेट देतात.',
+                'शिष्यवृत्ती': 'पात्रता आणि गरजेनुसार शिष्यवृत्ती उपलब्ध. छात्र पोर्टल वरून अर्ज करा.',
+                'संपर्क': 'आमच्याशी संपर्क साधा info@college.edu किंवा कॉल करा +91-9876543210',
+                'हॅलो': 'हॅलो! मी तुम्हाला कशी मदत करू शकतो?',
+                'नमस्कार': 'नमस्कार! मी तुम्हाला कशी मदत करू शकतो?',
+                'धन्यवाद': 'तुमचे स्वागत आहे! इतर काहीतरी मदत हवी आहे का?',
+                'आभार': 'तुमचे स्वागत आहे! इतर काहीतरी मदत हवी आहे का?'
+            },
+            'bn': {
+                'কোর্স': 'বি.টেক, এম.টেক, পিএইচডি প্রোগ্রাম উপলব্ধ। বিস্তারিত জানতে ওয়েবসাইট দেখুন।',
+                'ফি': 'ফি তথ্যের জন্য finance@college.edu এ যোগাযোগ করুন।',
+                'ভর্তি': 'মে মাসে ভর্তি খোলা। ফর্ম এবং শেষ তারিখের জন্য ওয়েবসাইট দেখুন।',
+                'আবাসন': 'সমস্ত ছাত্রছাত্রীদের জন্য আবাসন সুবিধা উপলব্ধ। বিস্তারিত জানতে hostel@college.edu এ যোগাযোগ করুন।',
+                'লাইব্রেরি': 'ছাত্রছাত্রীদের জন্য 24/7 লাইব্রেরি খোলা। 50,000 এর বেশি বই এবং জার্নাল উপলব্ধ।',
+                'পরীক্ষা': 'ছাত্র পোর্টালে পরীক্ষার সময়সূচি উপলব্ধ। প্রশ্নের জন্য exam@college.edu এ যোগাযোগ করুন।',
+                'চাকরি': 'চাকরি সেল সক্রিয়। শীর্ষ কোম্পানিগুলি নিয়মিতভাবে ক্যাম্পাসে আসে।',
+                'উপকরণ': 'যোগ্যতা এবং প্রয়োজনের উপর ভিত্তি করে উপকরণ উপলব্ধ। ছাত্র পোর্টালের মাধ্যমে আবেদন করুন।',
+                'যোগাযোগ': 'আমাদের সাথে যোগাযোগ করুন info@college.edu বা কল করুন +91-9876543210',
+                'হ্যালো': 'হ্যালো! আমি কীভাবে আপনাকে সাহায্য করতে পারি?',
+                'হাই': 'হাই! আমি কীভাবে আপনাকে সাহায্য করতে পারি?',
+                'ধন্যবাদ': 'স্বাগতম! আরও কিছু সাহায্য করতে পারি কি?',
+                'ধন্যবাদ': 'স্বাগতম! আরও কিছু সাহায্য করতে পারি কি?'
+            },
+            'te': {
+                'కోర్సు': 'బి.టెక్, ఎం.టెక్, పిహెచ్‌డి ప్రోగ్రామ్‌లు అందుబాటులో ఉన్నాయి. వివరాల కోసం వెబ్‌సైట్‌ను సందర్శించండి.',
+                'ఫీజు': 'ఫీజు సమాచారం కోసం finance@college.edu కు సంప్రదించండి.',
+                'ఎడ్మిషన్': 'మే లో ఎడ్మిషన్లు తెరవబడతాయి. ఫారమ్‌లు మరియు డెడ్‌లైన్‌ల కోసం వెబ్‌సైట్‌ను చూడండి.',
+                'హాస్టల్': 'అన్ని విద్యార్థులకు హాస్టల్ సౌకర్యాలు అందుబాటులో ఉన్నాయి. వివరాల కోసం hostel@college.edu కు సంప్రదించండి.',
+                'లైబ్రరీ': 'విద్యార్థుల కోసం 24/7 లైబ్రరీ తెరవబడింది. 50,000 కంటే ఎక్కువ పుస్తకాలు మరియు జర్నల్స్ అందుబాటులో ఉన్నాయి.',
+                'పరీక్ష': 'విద్యార్థి పోర్టల్‌లో పరీక్ష షెడ్యూల్ అందుబాటులో ఉంది. ప్రశ్నలకు exam@college.edu కు సంప్రదించండి.',
+                'ప్లేస్మెంట్': 'ప్లేస్మెంట్ సెల్ క్రియాశీలంగా ఉంది. టాప్ కంపెనీలు రెగ్యులర్‌గా క్యాంపస్‌ను సందర్శిస్తాయి.',
+                'స్కాలర్‌షిప్': 'అర్హత మరియు అవసరం ఆధారంగా స్కాలర్‌షిప్‌లు అందుబాటులో ఉన్నాయి. విద్యార్థి పోర్టల్ ద్వారా దరఖాస్తు చేయండి.',
+                'కాంటాక్ట్': 'మమ్మల్ని సంప్రదించండి info@college.edu లేదా కాల్ చేయండి +91-9876543210',
+                'హలో': 'హలో! నేను మీకు ఏవిధంగా సహాయపడగలను?',
+                'హాయ్': 'హాయ్! నేను మీకు ఏవిధంగా సహాయపడగలను?',
+                'ధన్యవాదాలు': 'స్వాగతం! మరి ఏమైనా సహాయం కావాలా?',
+                'ధన్యవాదాలు': 'స్వాగతం! మరి ఏమైనా సహాయం కావాలా?'
+            }
+        };
+
+        let currentLanguage = 'en';
+        let recognition;
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('userInput').value = transcript;
+                    processQuery(transcript);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                };
+            }
+        }
+
+        // Get response from knowledge base
+        function getResponse(query) {
+            const lowerQuery = query.toLowerCase();
+            
+            // Check if we have a response in the knowledge base
+            if (knowledgeBase[currentLanguage]) {
+                for (const [key, value] of Object.entries(knowledgeBase[currentLanguage])) {
+                    if (lowerQuery.includes(key)) {
+                        return value;
+                    }
+                }
+            }
+            
+            // Check English knowledge base as fallback
+            if (currentLanguage !== 'en' && knowledgeBase['en']) {
+                for (const [key, value] of Object.entries(knowledgeBase['en'])) {
+                    if (lowerQuery.includes(key)) {
+                        return value;
+                    }
+                }
+            }
+            
+            return null; // No immediate response found
+        }
+
+        // Add message to chat display
+        function addMessageToChat(message, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        // Process user query
+        async function processQuery(query) {
+            if (!query.trim()) return;
+            
+            // Add user message to chat
+            addMessageToChat(query, true);
+            
+            // Clear input
+            document.getElementById('userInput').value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate processing delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Get immediate response if available
+            const immediateResponse = getResponse(query);
+            
+            // Hide typing indicator
+            hideTypingIndicator();
+            
+            if (immediateResponse) {
+                // Provide immediate response
+                addMessageToChat(immediateResponse);
+                
+                // Speak the response if speech is enabled
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(immediateResponse);
+                    utterance.lang = currentLanguage === 'en' ? 'en-US' : `${currentLanguage}-${currentLanguage.toUpperCase()}`;
+                    speechSynthesis.speak(utterance);
+                }
+            } else {
+                // Queue for admin response
+                addMessageToChat("I don't have information on that right now. Your query has been sent to the administration for response.");
+                
+                // In a real implementation, you would send this to your backend
+                // For now, we'll simulate storing it in localStorage
+                const queuedQueries = JSON.parse(localStorage.getItem('queuedQueries') || '[]');
+                queuedQueries.push({
+                    query: query,
+                    language: currentLanguage,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('queuedQueries', JSON.stringify(queuedQueries));
+                
+                // Notify admin (in a real app, this would be a backend notification)
+                console.log('New query queued for admin:', query);
+            }
+        }
+
+        // Set current language
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update speech recognition language
+            if (recognition) {
+                recognition.lang = lang === 'en' ? 'en-US' : `${lang}-${lang.toUpperCase()}`;
+            }
+        }
+
+        // Start voice input
+        function startVoiceInput() {
+            if (recognition) {
+                recognition.start();
+            } else {
+                alert('Speech recognition not supported in your browser.');
+            }
+        }
+
+        // Initialize chatbot
+        function initChatbot() {
+            initSpeechRecognition();
+            
+            // Set up event listeners
+            document.getElementById('sendButton').addEventListener('click', () => {
+                const query = document.getElementById('userInput').value;
+                processQuery(query);
+            });
+            
+            document.getElementById('userInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = document.getElementById('userInput').value;
+                    processQuery(query);
+                }
+            });
+            
+            document.getElementById('voiceButton').addEventListener('click', startVoiceInput);
+            
+            // Language selection
+            document.getElementById('languageSelect').addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+        }
+
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initChatbot);
+        } else {
+            initChatbot();
+        }
+    </script>
+</body>
+</html>

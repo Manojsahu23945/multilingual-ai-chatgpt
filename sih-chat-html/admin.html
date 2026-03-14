@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CampusBot | TechTitans</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>CampusBot Admin Panel</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="student.html" class="nav-link">Student Portal</a>
+                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="#queries" class="nav-link">Queries</a>
+                <a href="#settings" class="nav-link">Settings</a>
+            </div>
+            <div class="admin-info">
+                <div class="admin-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="admin-details">
+                    <span class="admin-name">Admin User</span>
+                    <span class="admin-role">Administrator</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="dashboard-section">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h2>Admin Dashboard</h2>
+                    <p>Manage student queries and communications</p>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon pending">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="pendingCount">12</h3>
+                            <p>Pending Queries</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon resolved">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="resolvedCount">48</h3>
+                            <p>Resolved Today</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon urgent">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="urgentCount">3</h3>
+                            <p>Urgent Queries</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="totalCount">243</h3>
+                            <p>Total This Month</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="showAllQueries()">
+                            <i class="fas fa-list"></i>
+                            View All Queries
+                        </button>
+                        <button class="action-btn" onclick="showUrgentQueries()">
+                            <i class="fas fa-exclamation"></i>
+                            Urgent Queries
+                        </button>
+                        <button class="action-btn" onclick="exportQueries()">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                        <button class="action-btn" onclick="showSettings()">
+                            <i class="fas fa-cog"></i>
+                            Email Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Queries Management Section -->
+        <section id="queries" class="queries-management">
+            <div class="container">
+                <div class="queries-header">
+                    <h3>Student Queries Management</h3>
+                    <div class="query-filters">
+                        <div class="filter-group">
+                            <label for="statusFilter">Status:</label>
+                            <select id="statusFilter">
+                                <option value="all">All Queries</option>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="categoryFilter">Category:</label>
+                            <select id="categoryFilter">
+                                <option value="all">All Categories</option>
+                                <option value="academic">Academic</option>
+                                <option value="admission">Admission</option>
+                                <option value="hostel">Hostel</option>
+                                <option value="exam">Examination</option>
+                                <option value="fee">Fee Related</option>
+                                <option value="library">Library</option>
+                                <option value="placement">Placement</option>
+                                <option value="technical">Technical</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="priorityFilter">Priority:</label>
+                            <select id="priorityFilter">
+                                <option value="all">All Priorities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <button class="refresh-btn" onclick="refreshQueries()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Queries Table -->
+                <div class="queries-table-container">
+                    <table class="queries-table">
+                        <thead>
+                            <tr>
+                                <th>Query ID</th>
+                                <th>Student Info</th>
+                                <th>Category</th>
+                                <th>Language</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queriesTableBody">
+                            <!-- Dynamic content will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Email Settings Section -->
+        <section id="settings" class="email-settings">
+            <div class="container">
+                <div class="settings-header">
+                    <h3>Email Configuration</h3>
+                    <p>Configure email settings for automated responses</p>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h4>SMTP Configuration</h4>
+                        <div class="form-group">
+                            <label for="smtpHost">SMTP Host</label>
+                            <input type="text" id="smtpHost" value="smtp.gmail.com" placeholder="smtp.example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="smtpPort">SMTP Port</label>
+                            <input type="number" id="smtpPort" value="587" placeholder="587">
+                        </div>
+                        <div class="form-group">
+                            <label for="smtpUsername">Username</label>
+                            <input type="email" id="smtpUsername" placeholder="admin@college.edu">
+                        </div>
+                        <div class="form-group">
+                            <label for="smtpPassword">Password</label>
+                            <input type="password" id="smtpPassword" placeholder="App Password">
+                        </div>
+                        <button class="btn-primary" onclick="testEmailConnection()">Test Connection</button>
+                    </div>
+
+                    <div class="settings-card">
+                        <h4>Email Templates</h4>
+                        <div class="template-selector">
+                            <select id="templateType">
+                                <option value="confirmation">Query Confirmation</option>
+                                <option value="response">Query Response</option>
+                                <option value="followup">Follow-up</option>
+                            </select>
+                        </div>
+                        <div class="template-editor">
+                            <textarea id="emailTemplate" rows="8" placeholder="Email template content..."></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="saveTemplate()">Save Template</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Query Detail Modal -->
+    <div class="modal" id="queryModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="queryModalTitle">Query Details</h3>
+                <button class="modal-close" onclick="closeQueryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="query-details-grid">
+                    <div class="query-info">
+                        <h4>Student Information</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Student ID:</label>
+                                <span id="modalStudentId"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Name:</label>
+                                <span id="modalStudentName"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span id="modalStudentEmail"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Department:</label>
+                                <span id="modalDepartment"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Year:</label>
+                                <span id="modalYear"></span>
+                            </div>
+                            <div class="info-item">
+                                <label>Category:</label>
+                                <span id="modalCategory"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="query-content">
+                        <h4>Query Content</h4>
+                        <div class="language-toggle">
+                            <button class="lang-toggle active" data-lang="original">Original</button>
+                            <button class="lang-toggle" data-lang="translated">English Translation</button>
+                        </div>
+                        <div class="query-text">
+                            <div id="originalQuery" class="query-version active"></div>
+                            <div id="translatedQuery" class="query-version"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response Section -->
+                <div class="response-section">
+                    <h4>Admin Response</h4>
+                    <div class="response-form">
+                        <div class="response-header">
+                            <select id="responseLanguage">
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी</option>
+                                <option value="ta">தமிழ்</option>
+                                <option value="te">తెలుగు</option>
+                                <option value="bn">বাংলা</option>
+                            </select>
+                            <button class="translate-response-btn" onclick="translateResponse()">
+                                <i class="fas fa-language"></i> Auto Translate
+                            </button>
+                        </div>
+                        <textarea id="responseText" rows="6" placeholder="Type your response here..."></textarea>
+                        <div class="response-actions">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="sendCopy" checked>
+                                Send copy to department head
+                            </label>
+                            <div class="action-buttons">
+                                <button class="btn-secondary" onclick="saveAsDraft()">Save as Draft</button>
+                                <button class="btn-primary" onclick="sendResponse()">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send Response
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p id="loadingText">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/admin.js"></script>
+</body>
+</html>

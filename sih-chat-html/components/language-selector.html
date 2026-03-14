@@ -1,0 +1,29 @@
+<!-- Language Selector Component (converted from LanguageSelector.tsx) -->
+<div class="language-selector">
+  <!-- Language selector label -->
+  <div class="language-label">
+    <!-- Globe icon (SVG) -->
+    <svg class="icon text-blue-600" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+      <path d="M2 12h20"/>
+    </svg>
+    <span>Language:</span>
+  </div>
+  
+  <div class="language-select-container">
+    <select id="language-select" class="language-select" aria-label="Select language">
+      <option value="en">🇺🇸 English</option>
+      <option value="hi">🇮🇳 हिंदी</option>
+      <option value="te">🇮🇳 తెలుగు</option>
+      <option value="ta">🇮🇳 தமிழ்</option>
+    </select>
+    
+    <!-- Custom dropdown arrow -->
+    <div class="dropdown-arrow">
+      <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusBot - Student Authentication</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a4ba0);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .auth-container {
+            padding: 30px;
+        }
+
+        .chatbot-container {
+            display: none;
+            flex-direction: column;
+            height: 80vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #0d1b3e;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #1a3a8f;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(13, 27, 62, 0.2);
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .switch-form a {
+            color: #1a3a8f;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .switch-form a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message {
+            color: #27ae60;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Chatbot Styles */
+        .chat-header {
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 5px 10px;
+        }
+
+        .language-selector select {
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .language-selector select option {
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f0f4f8;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #1a3a8f;
+        }
+
+        .voice-btn, .send-btn {
+            background: linear-gradient(90deg, #0d1b3e, #1a3a8f);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-btn:hover, .send-btn:hover {
+            background: linear-gradient(90deg, #1a3a8f, #0d1b3e);
+            transform: scale(1.05);
+        }
+
+        .voice-btn i, .send-btn i {
+            font-size: 18px;
+        }
+
+        .typing-indicator {
+            align-self: flex-start;
+            background-color: white;
+            padding: 12px 18px;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: #1a3a8f;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: bounce 1.3s linear infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                height: 90vh;
+                border-radius: 15px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Authentication Section -->
+        <div class="auth-container" id="authContainer">
+            <div class="header">
+                <h1>CampusBot</h1>
+                <p>Student Authentication Portal</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password">
+                </div>
+                <button class="btn" id="loginBtn">Login</button>
+                <div class="switch-form">
+                    Don't have an account? <a href="#" id="showRegister">Register here</a>
+                </div>
+            </div>
+            
+            <!-- Registration Form -->
+            <div id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label for="registerEnrollment">Enrollment Number</label>
+                    <input type="text" id="registerEnrollment" placeholder="Enter your enrollment number">
+                </div>
+                <button class="btn" id="registerBtn">Register</button>
+                <div class="switch-form">
+                    Already have an account? <a href="#" id="showLogin">Login here</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chatbot Section -->
+        <div class="chatbot-container" id="chatbotContainer">
+            <div class="chat-header">
+                <div class="language-selector">
+                    <select id="languageSelect">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi</option>
+                        <option value="mr">Marathi</option>
+                        <option value="bn">Bengali</option>
+                    </select>
+                </div>
+                <h1>CampusBot</h1>
+                <p>Your multilingual college assistant</p>
+                <div class="user-info">
+                    <span id="userName">Student</span>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    Hello! I'm CampusBot. How can I assist you today?
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="userInput" placeholder="Type your message here...">
+                <button class="voice-btn" id="voiceButton">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="send-btn" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        // Knowledge base for multilingual responses
+        const knowledgeBase = {
+            'en': {
+                'course': 'B.Tech, M.Tech, PhD programs available. Visit website for details.',
+                'fee': 'Contact finance@college.edu for fee information.',
+                'admission': 'Admissions open in May. Check website for forms and deadlines.',
+                'hostel': 'Hostel facilities available for all students. Contact hostel@college.edu for details.',
+                'library': 'Library open 24/7 for students. Over 50,000 books and journals available.',
+                'exam': 'Exam schedule available on student portal. Contact exam@college.edu for queries.',
+                'placement': 'Placement cell active. Top companies visit campus regularly.',
+                'scholarship': 'Merit and need-based scholarships available. Apply through student portal.',
+                'contact': 'Contact us at info@college.edu or call +91-9876543210',
+                'hello': 'Hello! How can I assist you today?',
+                'hi': 'Hi there! How can I help you?',
+                'thanks': 'You\'re welcome! Is there anything else I can help with?',
+                'thank you': 'You\'re welcome! Is there anything else I can help with?'
+            },
+            'hi': {
+                'पाठ्यक्रम': 'बी.टेक, एम.टेक, पीएचडी कार्यक्रम उपलब्ध हैं। विवरण के लिए वेबसाइट पर जाएं।',
+                'शुल्क': 'शुल्क जानकारी के लिए finance@college.edu से संपर्क करें।',
+                'प्रवेश': 'मई में प्रवेश खुला है। फॉर्म और समय सीमा के लिए वेबसाइट देखें।',
+                'छात्रावास': 'सभी छात्रों के लिए छात्रावास सुविधाएं उपलब्ध हैं। विवरण के लिए hostel@college.edu से संपर्क करें।',
+                'पुस्तकालय': 'छात्रों के लिए 24/7 पुस्तकालय खुला है। 50,000 से अधिक पुस्तकें और पत्रिकाएं उपलब्ध हैं।',
+                'परीक्षा': 'छात्र पोर्टल पर परीक्षा कार्यक्रम उपलब्ध है। पूछताछ के लिए exam@college.edu से संपर्क करें।',
+                'नौकरी': 'नौकरी कक्ष सक्रिय है। शीर्ष कंपनियां नियमित रूप से परिसर का दौरा करती हैं।',
+                'छात्रवृत्ति': 'योग्यता और आवश्यकता के आधार पर छात्रवृत्ति उपलब्ध है। छात्र पोर्टल के माध्यम से आवेदन करें।',
+                'संपर्क': 'हमसे संपर्क करें info@college.edu या कॉल करें +91-9876543210',
+                'नमस्ते': 'नमस्ते! मैं आज आपकी कैसे सहायता कर सकता हूँ?',
+                'हैलो': 'हैलो! मैं आपकी कैसे मदद कर सकता हूँ?',
+                'धन्यवाद': 'आपका स्वागत है! क्या मैं कुछ और मदद कर सकता हूँ?',
+                'शुक्रिया': 'आपका स्वागत है! क्या मैं कुछ और मदद कर सकता हूँ?'
+            },
+            'mr': {
+                'अभ्यासक्रम': 'बी.टेक, एम.टेक, पीएचडी कार्यक्रम उपलब्ध. तपशीलांसाठी संकेतस्थळ पहा.',
+                'शुल्क': 'शुल्क माहितीसाठी finance@college.edu शी संपर्क साधा.',
+                'प्रवेश': 'मे मध्ये प्रवेश उघडे आहे. अर्ज आणि अंतिम तारीखींसाठी संकेतस्थळ पहा.',
+                'छात्रावास': 'सर्व विद्यार्थ्यांसाठी छात्रावास सुविधा उपलब्ध. तपशीलांसाठी hostel@college.edu शी संपर्क साधा.',
+                'ग्रंथालय': 'विद्यार्थ्यांसाठी 24/7 ग्रंथालय उघडे आहे. 50,000 हून अधिक पुस्तके आणि वृत्तपत्रे उपलब्ध.',
+                'परीक्षा': 'छात्र पोर्टल वर परीक्षा वेळापत्रक उपलब्ध. पृच्छांसाठी exam@college.edu शी संपर्क साधा.',
+                'नोकरी': 'नोकरी कक्ष सक्रिय. शीर्ष कंपन्या नियमितपणे कॅम्पस भेट देतात.',
+                'शिष्यवृत्ती': 'पात्रता आणि गरजेनुसार शिष्यवृत्ती उपलब्ध. छात्र पोर्टल वरून अर्ज करा.',
+                'संपर्क': 'आमच्याशी संपर्क साधा info@college.edu किंवा कॉल करा +91-9876543210',
+                'हॅलो': 'हॅलो! मी तुम्हाला कशी मदत करू शकतो?',
+                'नमस्कार': 'नमस्कार! मी तुम्हाला कशी मदत करू शकतो?',
+                'धन्यवाद': 'तुमचे स्वागत आहे! इतर काहीतरी मदत हवी आहे का?',
+                'आभार': 'तुमचे स्वागत आहे! इतर काहीतरी मदत हवी आहे का?'
+            },
+            'bn': {
+                'কোর্স': 'বি.টেক, এম.টেক, পিএইচডি প্রোগ্রাম উপলব্ধ। বিস্তারিত জানতে ওয়েবসাইট দেখুন।',
+                'ফি': 'ফি তথ্যের জন্য finance@college.edu এ যোগাযোগ করুন।',
+                'ভর্তি': 'মে মাসে ভর্তি খোলা। ফর্ম এবং শেষ তারিখের জন্য ওয়েবসাইট দেখুন।',
+                'আবাসন': 'সমস্ত ছাত্রছাত্রীদের জন্য আবাসন সুবিধা উপলব্ধ। বিস্তারিত জানতে hostel@college.edu এ যোগাযোগ করুন।',
+                'লাইব্রেরি': 'ছাত্রছাত্রীদের জন্য 24/7 লাইব্রেরি খোলা। 50,000 এর বেশি বই এবং জার্নাল উপলব্ধ।',
+                'পরীক্ষা': 'ছাত্র পোর্টালে পরীক্ষার সময়সূচি উপলব্ধ। প্রশ্নের জন্য exam@college.edu এ যোগাযোগ করুন।',
+                'চাকরি': 'চাকরি সেল সক্রিয়। শীর্ষ কোম্পানিগুলি নিয়মিতভাবে ক্যাম্পাসে আসে।',
+                'উপকরণ': 'যোগ্যতা এবং প্রয়োজনের উপর ভিত্তি করে উপকরণ উপলব্ধ। ছাত্র পোর্টালের মাধ্যমে আবেদন করুন।',
+                'যোগাযোগ': 'আমাদের সাথে যোগাযোগ করুন info@college.edu বা কল করুন +91-9876543210',
+                'হ্যালো': 'হ্যালো! আমি কীভাবে আপনাকে সাহায্য করতে পারি?',
+                'হাই': 'হাই! আমি কীভাবে আপনাকে সাহায্য করতে পারি?',
+                'ধন্যবাদ': 'স্বাগতম! আরও কিছু সাহায্য করতে পারি কি?',
+                'ধন্যবাদ': 'স্বাগতম! আরও কিছু সাহায্য করতে পারি কি?'
+            }
+        };
+
+        // DOM Elements
+        const authContainer = document.getElementById('authContainer');
+        const chatbotContainer = document.getElementById('chatbotContainer');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const userName = document.getElementById('userName');
+
+        // Chatbot elements
+        const languageSelect = document.getElementById('languageSelect');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const voiceButton = document.getElementById('voiceButton');
+        const chatMessages = document.getElementById('chatMessages');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // State variables
+        let currentUser = null;
+        let currentLanguage = 'en';
+        let recognition;
+
+        // Initialize speech recognition
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                // Set initial language based on current selection
+                recognition.lang = getSpeechRecognitionLanguage(currentLanguage);
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    userInput.value = transcript;
+                    processQuery(transcript);
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    showError('Speech recognition error: ' + event.error);
+                };
+            } else {
+                // Hide voice button if not supported
+                voiceButton.style.display = 'none';
+            }
+        }
+
+        // Get speech recognition language code based on selected language
+        function getSpeechRecognitionLanguage(lang) {
+            const languageMap = {
+                'en': 'en-US',
+                'hi': 'hi-IN',
+                'mr': 'mr-IN',
+                'bn': 'bn-IN'
+            };
+            return languageMap[lang] || 'en-US';
+        }
+
+        // Get speech synthesis language code based on selected language
+        function getSpeechSynthesisLanguage(lang) {
+            const languageMap = {
+                'en': 'en-US',
+                'hi': 'hi-IN',
+                'mr': 'mr-IN',
+                'bn': 'bn-IN'
+            };
+            return languageMap[lang] || 'en-US';
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Switch to registration form
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        });
+
+        // Switch to login form
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+
+        // Register user
+        registerBtn.addEventListener('click', () => {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const enrollment = document.getElementById('registerEnrollment').value;
+            
+            if (!name || !email || !password || !enrollment) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            // Check if user already exists
+            const users = JSON.parse(localStorage.getItem('campusBotUsers') || '[]');
+            const existingUser = users.find(user => user.email === email);
+            
+            if (existingUser) {
+                showError('User with this email already exists');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password, // In a real app, this should be hashed
+                enrollment,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('campusBotUsers', JSON.stringify(users));
+            
+            showSuccess('Registration successful! You can now login.');
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            
+            // Clear form fields
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerEnrollment').value = '';
+        });
+
+        // Login user
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showError('Please enter both email and password');
+                return;
+            }
+            
+            // Check credentials
+            const users = JSON.parse(localStorage.getItem('campusBotUsers') || '[]');
+            const user = users.find(user => user.email === email && user.password === password);
+            
+            if (user) {
+                currentUser = user;
+                userName.textContent = user.name;
+                showSuccess('Login successful!');
+                
+                // Switch to chatbot interface
+                setTimeout(() => {
+                    authContainer.style.display = 'none';
+                    chatbotContainer.style.display = 'flex';
+                }, 1000);
+            } else {
+                showError('Invalid email or password');
+            }
+        });
+
+        // Logout user
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            chatbotContainer.style.display = 'none';
+            authContainer.style.display = 'block';
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+            
+            // Clear login form
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        });
+
+        // Get response from knowledge base
+        function getResponse(query) {
+            const lowerQuery = query.toLowerCase();
+            
+            // Check if we have a response in the knowledge base
+            if (knowledgeBase[currentLanguage]) {
+                for (const [key, value] of Object.entries(knowledgeBase[currentLanguage])) {
+                    if (lowerQuery.includes(key)) {
+                        return value;
+                    }
+                }
+            }
+            
+            // Check English knowledge base as fallback
+            if (currentLanguage !== 'en' && knowledgeBase['en']) {
+                for (const [key, value] of Object.entries(knowledgeBase['en'])) {
+                    if (lowerQuery.includes(key)) {
+                        return value;
+                    }
+                }
+            }
+            
+            return null; // No immediate response found
+        }
+
+        // Add message to chat display
+        function addMessageToChat(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Process user query
+        async function processQuery(query) {
+            if (!query.trim()) return;
+            
+            // Add user message to chat
+            addMessageToChat(query, true);
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate processing delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Get immediate response if available
+            const immediateResponse = getResponse(query);
+            
+            // Hide typing indicator
+            hideTypingIndicator();
+            
+            if (immediateResponse) {
+                // Provide immediate response
+                addMessageToChat(immediateResponse);
+                
+                // Speak the response if speech is enabled
+                if ('speechSynthesis' in window) {
+                    try {
+                        const utterance = new SpeechSynthesisUtterance(immediateResponse);
+                        utterance.lang = getSpeechSynthesisLanguage(currentLanguage);
+                        utterance.rate = 0.7; // Slightly slower for clarity
+                        speechSynthesis.speak(utterance);
+                    } catch (error) {
+                        console.error('Speech synthesis error:', error);
+                    }
+                }
+            } else {
+                // Queue for admin response
+                addMessageToChat("I don't have information on that right now. Your query has been sent to the administration for response.");
+                
+                // In a real implementation, you would send this to your backend
+                // For now, we'll simulate storing it in localStorage
+                const queuedQueries = JSON.parse(localStorage.getItem('queuedQueries') || '[]');
+                queuedQueries.push({
+                    studentId: currentUser.id,
+                    studentName: currentUser.name,
+                    query: query,
+                    language: currentLanguage,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('queuedQueries', JSON.stringify(queuedQueries));
+                
+                // Notify admin (in a real app, this would be a backend notification)
+                console.log('New query queued for admin:', query);
+            }
+        }
+
+        // Set current language
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update speech recognition language
+            if (recognition) {
+                try {
+                    recognition.lang = getSpeechRecognitionLanguage(lang);
+                } catch (error) {
+                    console.warn('Could not set speech recognition language:', error);
+                }
+            }
+        }
+
+        // Start voice input
+        function startVoiceInput() {
+            if (recognition) {
+                try {
+                    // Update language before starting
+                    recognition.lang = getSpeechRecognitionLanguage(currentLanguage);
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error starting speech recognition:', error);
+                    showError('Could not start voice recognition. Please try again.');
+                }
+            } else {
+                alert('Speech recognition not supported in your browser.');
+            }
+        }
+
+        // Initialize application
+        function initApp() {
+            initSpeechRecognition();
+            
+            // Set up chatbot event listeners
+            sendButton.addEventListener('click', () => {
+                const query = userInput.value;
+                processQuery(query);
+            });
+            
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const query = userInput.value;
+                    processQuery(query);
+                }
+            });
+            
+            voiceButton.addEventListener('click', startVoiceInput);
+            
+            // Language selection
+            languageSelect.addEventListener('change', (e) => {
+                setLanguage(e.target.value);
+            });
+        }
+
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
